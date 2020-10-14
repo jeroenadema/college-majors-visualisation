@@ -3,11 +3,29 @@ let salarySizeScale, salaryXScale, categoryColorScale
 let simulation, nodes
 let categoryLegend, salaryLegend
 
-const categories = ['Zvw', 'Wlz', 'Wmo']
+// handmatig
+const categories = ["MSZ - DBC zorgproducten","Wlz thuiswonend","Hulpmiddelen","Extramurale farmacie","MSZ - dure geneesmiddelen","Wlz overig"
+ ,"MSZ - overige zorgproducten","Wlz instelling", "Overige eerstelijnszorg","Huisartsenzorg"
+ ,"Multidisciplinaire zorg vanuit eerstelijn", "Geestelijke gezondheidszorg","Overig","Wijkverpleging","Geboortezorg","Subsidieregeling Wlz"];
 
-const categoriesXY = {'Zvw': [0, 400, 57382, 23.9],
-                        'Wlz': [0, 600, 43538, 48.3],
-                        'Wmo': [0, 800, 41890, 50.9]}
+const categoriesXY = {'MSZ - DBC zorgproducten': [0, 400, 57382, 23.9],
+                        'Wlz thuiswonend': [0, 600, 43538, 48.3],
+                        'Hulpmiddelen': [0, 800, 41890, 50.9],
+                        'Extramurale farmacie': [0, 200, 42200, 48.3],
+                        'MSZ - dure geneesmiddelen': [200, 400, 42745, 31.2],
+                        'Wlz overig': [200, 600, 36900, 40.5],
+                        'MSZ - overige zorgproducten': [200, 800, 36342, 35.0],
+                        'Wlz instelling': [200, 200, 33062, 60.4],
+                        'Overige eerstelijnszorg': [400, 400, 36825, 79.5],
+                        'Huisartsenzorg': [400, 600, 37344, 55.4],
+                        'Multidisciplinaire zorg vanuit eerstelijn': [400, 800, 36421, 58.7],
+                        'Geestelijke gezondheidszorg': [400, 200, 32350, 74.9],
+                        'Overig': [600, 400, 31913, 63.2],
+                        'Wijkverpleging': [600, 600, 30100, 79.4],
+                        'Geboortezorg': [600, 800, 34500, 65.9],
+                        'Subsidieregeling Wlz': [600, 200, 35000, 77.1]
+
+}
 
 const margin = {left: 170, top: 50, bottom: 50, right: 20}
 const width = 1000 - margin.left - margin.right
@@ -44,7 +62,8 @@ const colors = ['#ffcc00', '#ff6666', '#cc0066', '#66cccc', '#f688bb', '#65587f'
 function createScales(){
     salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
     salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width+250])
-    salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
+    //salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
+    salaryYScale = d3.scaleLinear([7, 105500], [margin.top + height, margin.top])
     categoryColorScale = d3.scaleOrdinal(categories, colors)
     shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
     enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left + 120, margin.left + width - 50])
@@ -79,8 +98,8 @@ function createSizeLegend(){
         .scale(salarySizeScale)
         .shape('circle')
         .shapePadding(15)
-        .title('Salary Scale')
-        .labelFormat(d3.format("$,.2r"))
+        .title('Gem. kosten €')
+        .labelFormat(d3.format(".2r"))
         .cells(7)
 
     d3.select('.sizeLegend')
@@ -98,7 +117,7 @@ function createSizeLegend2(){
         .shape('circle')
         .shapePadding(55)
         .orient('horizontal')
-        .title('Enrolment Scale')
+        .title('Eindresultaat')
         .labels(['1000', '200000', '400000'])
         .labelOffset(30)
         .cells(3)
@@ -182,11 +201,14 @@ function drawInitial(){
             .style('left', (d3.event.pageX + 10)+ 'px')
             .style('top', (d3.event.pageY - 25) + 'px')
             .style('display', 'inline-block')
-            .html(`<strong>Zorgsoort:</strong> ${d.Major[0] + d.Major.slice(1,).toLowerCase()}
-                <br> <strong>Gem. kosten:</strong> $${d3.format(",.2r")(d.Median)}
-                <br> <strong>Zorgwet:</strong> ${d.Category}
+            .html(`
+                <strong>Categorie:</strong> ${d.Category}
+                <br><strong>Subcategorie:</strong> ${d.Major[0] + d.Major.slice(1,).toLowerCase()}
+                <br> <strong>Kosten pp:</strong> $${d3.format(",.2r")(d.Median)}
                 <br> <strong>% Vrouwen:</strong> ${Math.round(d.ShareWomen*100)}%
                 <br> <strong># patienten:</strong> ${d3.format(",.2r")(d.Total)}`)
+
+
     }
 
     function mouseOut(d, i){
@@ -401,7 +423,7 @@ function draw3(){
         .attr('x', d => categoriesXY[d][0] + 120)
 
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 30)
-        .text(d => `Gem. kosten: ${d3.format(",.2r")(categoriesXY[d][2])}`)
+        .text(d => `Gem. kosten: € ${d3.format(",.2r")(categoriesXY[d][2])}`)
         .attr('x', d => categoriesXY[d][0] + 200)
         .attr('y', d => categoriesXY[d][1] + 50)
         .attr('opacity', 1)
@@ -425,6 +447,7 @@ function draw3(){
 
 }
 
+// ik gok dat dit median + gender + ratio is
 function draw5(){
 
     let svg = d3.select('#vis').select('svg')

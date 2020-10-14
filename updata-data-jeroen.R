@@ -1,37 +1,79 @@
+library(dplyr)
+library(readr)
+
 tabel <- read.csv("data/CopyOfrecent-grads.csv")
-
-tabel$Major[1] <- 'Ziekenhuiszorg'
-tabel$Major[2] <- 'Geestelijke gezondheidszorg'
-tabel$Major[3] <- 'Hulpmiddelen'
-tabel$Major[4] <- 'Mondzorg'
-tabel$Major[5] <- 'Wijkverpleging'
-tabel$Major[6] <- 'Medicijnen'
-tabel$Major[7] <- 'Huisartsenzorg'
-tabel$Major[8] <- 'Eerstelijnsverblijf'
-tabel$Major[8] <- 'Geboortezorg'
-tabel$Major_category[1:8] <- 'Zvw'
-
-tabel$Major[9] <- 'Verblijf in een zorginstelling'
-tabel$Major[10] <- 'Persoonlijke verzorging en verpleging'
-tabel$Major[11] <- 'Medische zorg'
-tabel$Major[12] <- 'Dagbesteding'
-tabel$Major[13] <- 'Hulpmiddelen'
-tabel$Major[14] <- 'Vervoer'
-tabel$Major_category[9:14] <- 'Wlz'
-
-tabel$Major[15] <- 'Algemeen'
-tabel$Major[16] <- 'Maatwerk'
-tabel$Major[17] <- 'Vervoer'
-tabel$Major_category[15:17] <- 'Wmo'
-
-tabel <- tabel[1:17,]
+# in use: midpoint, median, women, man,Unemployment_rate, total
+tabel$Major_code <- NULL
+tabel$Full_time_year_round <- NULL
+tabel$Median_bin <- NULL
+tabel$College_jobs <- NULL
+tabel$Total_bin <- NULL
+tabel$Full_time <- NULL
+tabel$Sample_size <- NULL
+tabel$Non_college_jobs <- NULL
+tabel$Low_wage_jobs <- NULL
 
 
-colnames(tabel) <- c("Rank","Major_code","Major","Total","Men"
-                     ,"Women","Major_category","ShareWomen","Sample_size","Employed"
-                     ,"Full_time","Part_time","Full_time_year_round", "Unemployed","Unemployment_rate"
-                     ,"Median","P25th","P75th","College_jobs","Non_college_jobs"
-                     ,"Low_wage_jobs","Total_bin","temp","Median_bin","Histogram_column"
-                     ,"midpoint")
+viz <- read.csv2("data/viz-4.csv")
+viz <- viz %>% filter(Jaar == 2019)
+viz$Kosten <- gsub("\\.", "", viz$Kosten)
+viz$Kosten <- as.numeric(viz$Kosten)
+viz <- filter(viz, Mensen > 100)
+
+
+
+tabel <- tabel[1:nrow(viz),]
+tabel <- cbind(tabel, viz)
+
+tabel$Major_category <- tabel$Zorgsoort
+tabel$Major <- tabel$Subgroep
+tabel$Zorgsoort <- NULL
+tabel$Subgroep <- NULL
+tabel$Total <- tabel$Kostpp
+tabel$Median <- tabel$Total
+tabel$Total <- tabel$Mensen
+
+
+
+#unique(tabel$Zorgsoort)
+
+
+#tabel %>% filter(Major_category == 'MSZ - dure geneesmiddelen')
+#tabel %>% filter(Major_category == 'Hulpmiddelen')
+#tabel %>% filter(Median > 10652260190)
+
+#options(scipen=999)
+
+tabel$ShareWomen[is.na(tabel$ShareWomen)] <- 0 # minifix
+
+tabel$Men <- NULL
+tabel$Women <- NULL
+tabel$ShareWomen2 <- round(tabel$Females / (tabel$Males + tabel$Females),4)
+tabel$ShareWomen <- tabel$ShareWomen2
+summary(tabel$ShareWomen)
+summary(tabel$ShareWomen2)
+
+tabel$Mensen <- NULL
+tabel$Males <- NULL
+tabel$Females <- NULL
+tabel$X <- NULL
+tabel$X.1 <- NULL
+tabel$X.2 <- NULL
+tabel$X.3 <- NULL
+tabel$Employed <- NULL
+tabel$Part_time <- NULL
+tabel$Unemployed <- NULL
+tabel$P25th <- NULL
+tabel$P75th <- NULL
+#tabel$midpoint <- NULL # belangrijk
+tabel$Unemployment_rate <- NULL
+tabel$Histogram_column <- NULL
+tabel$temp <- NULL
+
+#filter(tabel, Major == 'Huisartsenzorg')
+
 
 write.csv(x = tabel, file = "data/recent-grads.csv")
+
+filter(tabel, Major == 'Huisartsenzorg')
+#filter(viz, Zorgsoort == 'Huisartsenzorg')
